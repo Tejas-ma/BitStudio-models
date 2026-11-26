@@ -1,0 +1,95 @@
+name: Release Models
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub release tag"
+        required: true
+        default: "models-v0.1"
+      commit_catalog:
+        description: "Commit and push updated catalog.json to main"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install "demucs-onnx[export]" onnxruntime "numpy<2"
+
+      - name: Prepare models (export, verify, hash, catalog)
+        run: python tools/prepare_models.py
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+
+      - name: Rewrite final download URLs and updated_at
+        run: |
+          python - <<'EOF'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          catalog_path = Path("models/catalog.json")
+          data = json.loads(catalog_path.read_text(encoding="utf-8"))
+          tag = "${{ inputs.release_tag }}"
+          github_repo = "${{ github.repository }}"
+
+          filename_map = {
+              "deepfilternet3-denoise": "DeepFilterNet3_onnx.tar.gz",
+              "htdemucs-4stem-v4": "htdemucs.onnx",
+          }
+
+          for model in data["models"]:
+              filename = filename_map[model["id"]]
+              model["download_url"] = (
+                  f"https://github.com/{github_repo}/releases/download/"
+                  f"{tag}/{filename}"
+              )
+
+          data["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          catalog_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+          print("Updated catalog.json download URLs and updated_at.")
+          EOF
+
+      - name: Create or update GitHub Release
+        run: |
+          gh release create ${{ inputs.release_tag }} \
+            --title "${{ inputs.release_tag }}" \
+            --notes "Automated ONNX model release." \
+            --clobber \
+            || gh release edit ${{ inputs.release_tag }} \
+            --clobber
+          gh release upload ${{ inputs.release_tag }} release_assets/* --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit updated catalog.json
+        if: inputs.commit_catalog == true
+        run: |
+          if ! git diff --quiet models/catalog.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add models/catalog.json
+            git commit -m "chore: update models/catalog.json for release \`${{ inputs.release_tag }}\`"
+            git push origin HEAD:main
+          else
+            echo "catalog.json unchanged; nothing to commit."
+          fi

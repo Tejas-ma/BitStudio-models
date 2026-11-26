@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "updated_at": "<AUTO_FILLED_BY_SCRIPT>",
+  "models": [
+    {
+      "id": "deepfilternet3-denoise",
+      "name": "DeepFilterNet 3",
+      "category": "denoising",
+      "version": "3.0",
+      "license": "MIT / Apache-2.0",
+      "size_bytes": 0,
+      "sha256": "<AUTO_FILLED_BY_SCRIPT>",
+      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/models-v0.1/DeepFilterNet3_onnx.tar.gz",
+      "package_format": "tar.gz",
+      "entry_files": ["enc.onnx", "erb_dec.onnx", "df_dec.onnx", "config.ini"],
+      "audio_spec": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "frame_samples": 480,
+        "realtime_capable": true
+      },
+      "recommended_providers": ["CPUExecutionProvider", "DmlExecutionProvider"]
+    },
+    {
+      "id": "htdemucs-4stem-v4",
+      "name": "HTDemucs v4",
+      "category": "source-separation",
+      "version": "4.0",
+      "license": "MIT",
+      "size_bytes": 0,
+      "sha256": "<AUTO_FILLED_BY_SCRIPT>",
+      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/models-v0.1/htdemucs.onnx",
+      "package_format": "onnx",
+      "entry_files": ["htdemucs.onnx"],
+      "audio_spec": {
+        "sample_rate": 44100,
+        "channels": 2,
+        "segment_samples": 343980,
+        "realtime_capable": false,
+        "input_tensor": {
+          "name": "mix",
+          "shape": [1, 2, 343980],
+          "dtype": "float32"
+        },
+        "output_tensor": {
+          "name": "stems",
+          "shape": [1, 4, 2, 343980],
+          "dtype": "float32"
+        },
+        "stem_order": ["drums", "bass", "other", "vocals"]
+      },
+      "recommended_providers": ["DmlExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider"]
+    }
+  ]
+}

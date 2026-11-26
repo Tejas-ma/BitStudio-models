@@ -1,0 +1,7 @@
+release_assets/
+*.onnx
+*.tar.gz
+*.ckpt
+*.pth
+__pycache__/
+.venv/
