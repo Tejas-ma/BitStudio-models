@@ -27,7 +27,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+      - name: Install CPU PyTorch & export dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install "demucs-onnx[export]" onnxruntime "numpy<2" requests
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
