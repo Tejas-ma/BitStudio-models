@@ -1,0 +1,71 @@
+name: Validate Model Catalog
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "models/catalog.json"
+      - ".github/workflows/validate-catalog.yml"
+  pull_request:
+    paths:
+      - "models/catalog.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate models/catalog.json schema & licenses
+        run: |
+          python - <<'EOF'
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          catalog_path = Path("models/catalog.json")
+          if not catalog_path.exists():
+              sys.exit("ERROR: models/catalog.json not found.")
+
+          data = json.loads(catalog_path.read_text(encoding="utf-8"))
+          assert isinstance(data.get("schema_version"), int), "Missing integer schema_version"
+          models = data.get("models")
+          assert isinstance(models, list) and len(models) > 0, "models must be a non-empty list"
+
+          required_fields = {
+              "id", "name", "category", "version", "license",
+              "size_bytes", "sha256", "download_url", "audio_spec"
+          }
+          blocked_license_terms = ("nc", "non-commercial", "noncommercial", "gpl", "agpl")
+          seen_ids = set()
+          sha_re = re.compile(r"^[a-f0-9]{64}$")
+
+          for m in models:
+              missing = required_fields - set(m.keys())
+              assert not missing, f"Model {m.get('id')} missing fields: {missing}"
+
+              mid = m["id"]
+              assert mid not in seen_ids, f"Duplicate model id: {mid}"
+              seen_ids.add(mid)
+
+              lic_tokens = re.split(r"[\s/\-,]+", m["license"].lower())
+              for bad in blocked_license_terms:
+                  assert bad not in lic_tokens, f"Disallowed license '{m['license']}' on {mid}"
+
+              assert m["download_url"].startswith("https://"), f"Non-HTTPS download_url on {mid}"
+
+              sha = m["sha256"]
+              if sha != "<AUTO_FILLED_BY_SCRIPT>":
+                  assert sha_re.match(sha), f"Invalid SHA-256 format on {mid}: {sha}"
+                  assert isinstance(m["size_bytes"], int) and m["size_bytes"] > 0, f"Invalid size_bytes on {mid}"
+
+          print(f"OK: Validated {len(models)} model entries in models/catalog.json.")
+          EOF
+          
