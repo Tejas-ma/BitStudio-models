@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - "models/catalog.json"
+      - ".github/workflows/validate-catalog.yml"
 
 jobs:
   validate:
@@ -22,7 +23,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate models/catalog.json schema & licenses
+      - name: Validate models/catalog.json
         run: |
           python - <<'EOF'
           import json
@@ -34,14 +35,19 @@ jobs:
           if not catalog_path.exists():
               sys.exit("ERROR: models/catalog.json not found.")
 
-          data = json.loads(catalog_path.read_text(encoding="utf-8"))
+          raw = catalog_path.read_text(encoding="utf-8")
+          try:
+              data = json.loads(raw)
+          except json.JSONDecodeError as exc:
+              sys.exit(f"ERROR: models/catalog.json is not valid JSON: {exc}")
+
           assert isinstance(data.get("schema_version"), int), "Missing integer schema_version"
           models = data.get("models")
           assert isinstance(models, list) and len(models) > 0, "models must be a non-empty list"
 
           required_fields = {
               "id", "name", "category", "version", "license",
-              "size_bytes", "sha256", "download_url", "audio_spec"
+              "size_bytes", "sha256", "download_url", "audio_spec",
           }
           blocked_license_terms = ("nc", "non-commercial", "noncommercial", "gpl", "agpl")
           seen_ids = set()
@@ -68,4 +74,3 @@ jobs:
 
           print(f"OK: Validated {len(models)} model entries in models/catalog.json.")
           EOF
-          
