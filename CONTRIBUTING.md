@@ -76,11 +76,13 @@ EOF
 
 ## Step 5 — Package and submit
 
-1. Run `tools/prepare_models.py` (or your own equivalent) to regenerate `release_assets/` and rewrite `models/catalog.json` with final `size_bytes` and `sha256`.
+1. Run `tools/prepare_models.py` (or your own equivalent) to regenerate `release_assets/` and rewrite `models/catalog.json` with final `size_bytes`, `sha256`, `download_url`, and `updated_at`.
 2. Commit the updated catalog and any new assets that belong in version control.
 3. Open a Pull Request targeting `main`.
 4. The `validate-catalog.yml` workflow will run automatically on the PR once `models/catalog.json` is touched.
 5. Releases are created by the maintainer via `release-models.yml` (workflow dispatch).
+
+> The committed catalog can ship with placeholder values for `size_bytes`, `sha256`, and `download_url` (the `"<AUTO_FILLED_BY_SCRIPT>"` sentinel and `size_bytes: 0`). Those placeholders are acceptable in a PR that adds or updates a model, but they are not valid for a released artifact. The `release-models.yml` workflow rewrites them from real release files before publishing.
 
 ## License checklist
 

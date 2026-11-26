@@ -15,6 +15,8 @@ Both models run on Windows with ONNX Runtime execution providers:
 - **DmlExecutionProvider** — DirectML GPU acceleration on Windows, recommended for real-time use.
 - **CUDAExecutionProvider** — NVIDIA GPU acceleration (HTDemucs v4 only).
 
+> Committed `models/catalog.json` can include placeholder values for `size_bytes`, `sha256`, and `download_url` (the `"<AUTO_FILLED_BY_SCRIPT>"` sentinel and `size_bytes: 0`). That is acceptable in a PR that adds or updates a model, but it is not a released artifact. The `release-models.yml` workflow rewrites those fields from real release files before publishing.
+
 See [docs/MODEL_SPEC.md](docs/MODEL_SPEC.md) for exact tensor and audio contracts, SHA-256 verification rules, and the commercially safe license requirements enforced by the catalog.
 
 ## Repository Structure

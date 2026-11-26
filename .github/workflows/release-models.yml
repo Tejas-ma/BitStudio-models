@@ -52,13 +52,12 @@ jobs:
           tag = "${{ inputs.release_tag }}"
           github_repo = "${{ github.repository }}"
 
-          filename_map = {
-              "deepfilternet3-denoise": "DeepFilterNet3_onnx.tar.gz",
-              "htdemucs-4stem-v4": "htdemucs.onnx",
-          }
-
           for model in data["models"]:
-              filename = filename_map[model["id"]]
+              filename = model.get("release_filename")
+              if not filename:
+                  raise SystemExit(
+                      f"ERROR: {model['id']} is missing release_filename."
+                  )
               model["download_url"] = (
                   f"https://github.com/{github_repo}/releases/download/"
                   f"{tag}/{filename}"
@@ -77,6 +76,11 @@ jobs:
             --clobber \
             || gh release edit ${{ inputs.release_tag }} \
             --clobber
+
+          if [ -z "$(ls -A release_assets/)" ]; then
+            echo "ERROR: release_assets/ is empty; nothing to upload."
+            exit 1
+          fi
           gh release upload ${{ inputs.release_tag }} release_assets/* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

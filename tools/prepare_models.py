@@ -1,7 +1,6 @@
 import hashlib
 import json
 import os
-import platform
 import sys
 from pathlib import Path
 
@@ -32,15 +31,6 @@ def ensure_release_dir() -> Path:
 
 
 def export_htdemucs(target_dir: Path) -> Path:
-    # For compiler-inserted build guards on Windows, avoid msvcrt file-descriptor
-    # APIs in this process.  _osxselect_restrict is an internal CPython symbol that
-    # exists only where select is restricted (not on Linux runners).
-    if sys.platform == "win32":
-        try:
-            import _osxselect_restrict
-        except ImportError:
-            pass
-
     import demucs_onnx.export
 
     target = target_dir / HTDEMUCHS_ONNX
@@ -72,22 +62,22 @@ def download_deepfilter_net(target_dir: Path) -> Path:
     return target
 
 
+FILENAME_MAP = {
+    "deepfilternet3-denoise": "DeepFilterNet3_onnx.tar.gz",
+    "htdemucs-4stem-v4": "htdemucs.onnx",
+}
+
+
+def release_download_url(tag: str, github_repo: str, filename: str) -> str:
+    return f"https://github.com/{github_repo}/releases/download/{tag}/{filename}"
+
+
 def rewrite_catalog(tag: str, github_repo: str) -> dict:
     data = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
 
-    def release_download_url(filename: str) -> str:
-        return f"https://github.com/{github_repo}/releases/download/{tag}/{filename}"
-
     for model in data["models"]:
-        ext = ".tar.gz" if model.get("package_format") == "tar.gz" else ".onnx"
-        basename = model["id"].split("-")[0].replace("_", "")
-        # Map id -> concrete release filename
-        filename_map = {
-            "deepfilternet3-denoise": "DeepFilterNet3_onnx.tar.gz",
-            "htdemucs-4stem-v4": "htdemucs.onnx",
-        }
-        filename = filename_map[model["id"]]
-        model["download_url"] = release_download_url(filename)
+        filename = FILENAME_MAP[model["id"]]
+        model["download_url"] = release_download_url(tag, github_repo, filename)
 
     data["updated_at"] = (
         __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
@@ -111,11 +101,7 @@ def main() -> None:
     catalog = rewrite_catalog(tag, github_repo)
 
     for model in catalog["models"]:
-        filename_map = {
-            "deepfilternet3-denoise": DEEPFILTER_TAR,
-            "htdemucs-4stem-v4": HTDEMUCHS_ONNX,
-        }
-        path = RELEASE_DIR / filename_map[model["id"]]
+        path = RELEASE_DIR / FILENAME_MAP[model["id"]]
         model["size_bytes"] = file_size_bytes(path)
         model["sha256"] = sha256_hex(path)
 

@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "updated_at": "<AUTO_FILLED_BY_SCRIPT>",
+  "_note": "This catalog is a pre-release scaffold. Before a release, run tools/prepare_models.py (or the release-models.yml workflow) to populate size_bytes, sha256, download_url, and updated_at with real release artifact values.",
   "models": [
     {
       "id": "deepfilternet3-denoise",
@@ -10,8 +11,9 @@
       "license": "MIT / Apache-2.0",
       "size_bytes": 0,
       "sha256": "<AUTO_FILLED_BY_SCRIPT>",
-      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/models-v0.1/DeepFilterNet3_onnx.tar.gz",
+      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/RELEASE_TAG_PLACEHOLDER/DeepFilterNet3_onnx.tar.gz",
       "package_format": "tar.gz",
+      "release_filename": "DeepFilterNet3_onnx.tar.gz",
       "entry_files": ["enc.onnx", "erb_dec.onnx", "df_dec.onnx", "config.ini"],
       "audio_spec": {
         "sample_rate": 48000,
@@ -29,8 +31,9 @@
       "license": "MIT",
       "size_bytes": 0,
       "sha256": "<AUTO_FILLED_BY_SCRIPT>",
-      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/models-v0.1/htdemucs.onnx",
+      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/RELEASE_TAG_PLACEHOLDER/htdemucs.onnx",
       "package_format": "onnx",
+      "release_filename": "htdemucs.onnx",
       "entry_files": ["htdemucs.onnx"],
       "audio_spec": {
         "sample_rate": 44100,
