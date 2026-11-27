@@ -80,7 +80,6 @@ jobs:
             --notes "Automated ONNX model release." \
             --clobber \
             || gh release edit ${{ inputs.release_tag }} \
-            --clobber
 
           if [ -z "$(ls -A release_assets/)" ]; then
             echo "ERROR: release_assets/ is empty; nothing to upload."
