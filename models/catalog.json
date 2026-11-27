@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "<AUTO_FILLED_BY_SCRIPT>",
+  "updated_at": "2026-11-27T16:13:38Z",
   "_note": "This catalog is a pre-release scaffold. Before a release, run tools/prepare_models.py (or the release-models.yml workflow) to populate size_bytes, sha256, download_url, and updated_at with real release artifact values.",
   "models": [
     {
@@ -9,19 +9,27 @@
       "category": "denoising",
       "version": "3.0",
       "license": "MIT / Apache-2.0",
-      "size_bytes": 0,
-      "sha256": "<AUTO_FILLED_BY_SCRIPT>",
-      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/RELEASE_TAG_PLACEHOLDER/DeepFilterNet3_onnx.tar.gz",
+      "size_bytes": 7983136,
+      "sha256": "c94d91f70911001c946e0fabb4aa9adc37045f45a03b56008cb0c8244cb63616",
+      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/models-v0.1/DeepFilterNet3_onnx.tar.gz",
       "package_format": "tar.gz",
       "release_filename": "DeepFilterNet3_onnx.tar.gz",
-      "entry_files": ["enc.onnx", "erb_dec.onnx", "df_dec.onnx", "config.ini"],
+      "entry_files": [
+        "enc.onnx",
+        "erb_dec.onnx",
+        "df_dec.onnx",
+        "config.ini"
+      ],
       "audio_spec": {
         "sample_rate": 48000,
         "channels": 1,
         "frame_samples": 480,
         "realtime_capable": true
       },
-      "recommended_providers": ["CPUExecutionProvider", "DmlExecutionProvider"]
+      "recommended_providers": [
+        "CPUExecutionProvider",
+        "DmlExecutionProvider"
+      ]
     },
     {
       "id": "htdemucs-4stem-v4",
@@ -29,12 +37,14 @@
       "category": "source-separation",
       "version": "4.0",
       "license": "MIT",
-      "size_bytes": 0,
-      "sha256": "<AUTO_FILLED_BY_SCRIPT>",
-      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/RELEASE_TAG_PLACEHOLDER/htdemucs.onnx",
+      "size_bytes": 316446953,
+      "sha256": "8de897f4836c1fec6130c364c67fdeba4eeda1ceb4e39eaff2f7256d102536a8",
+      "download_url": "https://github.com/Tejas-ma/BitStudio-models/releases/download/models-v0.1/htdemucs.onnx",
       "package_format": "onnx",
       "release_filename": "htdemucs.onnx",
-      "entry_files": ["htdemucs.onnx"],
+      "entry_files": [
+        "htdemucs.onnx"
+      ],
       "audio_spec": {
         "sample_rate": 44100,
         "channels": 2,
@@ -42,17 +52,35 @@
         "realtime_capable": false,
         "input_tensor": {
           "name": "mix",
-          "shape": [1, 2, 343980],
+          "shape": [
+            1,
+            2,
+            343980
+          ],
           "dtype": "float32"
         },
         "output_tensor": {
           "name": "stems",
-          "shape": [1, 4, 2, 343980],
+          "shape": [
+            1,
+            4,
+            2,
+            343980
+          ],
           "dtype": "float32"
         },
-        "stem_order": ["drums", "bass", "other", "vocals"]
+        "stem_order": [
+          "drums",
+          "bass",
+          "other",
+          "vocals"
+        ]
       },
-      "recommended_providers": ["DmlExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider"]
+      "recommended_providers": [
+        "DmlExecutionProvider",
+        "CUDAExecutionProvider",
+        "CPUExecutionProvider"
+      ]
     }
   ]
 }
