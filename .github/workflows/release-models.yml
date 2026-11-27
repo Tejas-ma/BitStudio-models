@@ -37,7 +37,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
-          pip install "demucs-onnx[export]" onnxruntime "numpy<2"
+          pip install "demucs-onnx[export]" onnxruntime "numpy<2" requests
 
       - name: Prepare models (export, verify, hash, catalog)
         run: python tools/prepare_models.py
@@ -75,18 +75,17 @@ jobs:
 
       - name: Create or update GitHub Release
         run: |
-          gh release create ${{ inputs.release_tag }} \
-            --title "${{ inputs.release_tag }}" \
-            --notes "Automated ONNX model release." \
-            --clobber \
-            || gh release edit ${{ inputs.release_tag }} \
-            --clobber
+          TAG="${{ inputs.release_tag }}"
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "Automated ONNX model release."
 
           if [ -z "$(ls -A release_assets/)" ]; then
             echo "ERROR: release_assets/ is empty; nothing to upload."
             exit 1
           fi
-          gh release upload ${{ inputs.release_tag }} release_assets/* --clobber
+
+          gh release upload "$TAG" release_assets/* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
